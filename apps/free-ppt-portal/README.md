@@ -73,3 +73,26 @@ Share the generated HTTPS URL with the team.
 - You can later connect the full research/agent pipeline behind the same form.
 - `python-pptx` does not open `.potx` directly. For strict template fidelity,
   save a `.pptx` version of the template and point `PPT_TEMPLATE_PATH` to it.
+
+## Troubleshooting
+
+### "Deck is not being created"
+
+Check this local folder first:
+
+```text
+apps/free-ppt-portal/output-sharepoint-sync/
+```
+
+If files appear there, generation is working.
+
+### "Deck is created locally but not in SharePoint"
+
+Set `SHAREPOINT_SYNC_DIR` to your actual OneDrive-synced SharePoint folder and restart:
+
+```powershell
+$env:SHAREPOINT_SYNC_DIR="C:\Path\To\Your\Synced\PPTS"
+python app.py
+```
+
+Tip: In Windows Explorer, navigate to the synced SharePoint folder and copy the full path from the address bar.

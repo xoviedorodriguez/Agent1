@@ -179,6 +179,10 @@
     {% if success %}
       <div class="msg ok">
         <div><strong>Deck generated:</strong> {{ file_name }}</div>
+        <div><strong>Saved locally at:</strong> {{ local_file_path }}</div>
+        {% if using_fallback_dir %}
+        <div style="margin-top: 8px;"><strong>Sync not configured:</strong> The app is currently saving to a local fallback folder. Set <code>SHAREPOINT_SYNC_DIR</code> to your OneDrive-synced SharePoint folder, then restart the app.</div>
+        {% endif %}
         <div>Go to SharePoint folder:</div>
         <div><a href="{{ sharepoint_folder }}" target="_blank" rel="noopener noreferrer">{{ sharepoint_folder }}</a></div>
         <div style="margin-top: 10px;">Direct file link (after sync finishes):</div>

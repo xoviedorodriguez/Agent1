@@ -148,12 +148,17 @@ def generate():
         )
 
     out_path, file_url = generate_deck(topic, audience, industry, extra_prompt)
+    sharepoint_sync_dir_raw = os.getenv("SHAREPOINT_SYNC_DIR")
+    using_fallback_dir = not sharepoint_sync_dir_raw
+
     return render_template(
         "index.html",
         success=True,
         file_name=out_path.name,
+        local_file_path=str(out_path),
         sharepoint_folder=SHAREPOINT_FOLDER_URL,
         sharepoint_file=file_url,
+        using_fallback_dir=using_fallback_dir,
     )
 
 
