@@ -28,7 +28,7 @@ You save consultants time by:
 2. Structuring the content following the approved corporate slide standard.
 3. Generating a `.pptx` file using Python and `python-pptx` that applies the company's
    brand colors, fonts, and layout conventions from the master template.
-4. Saving the output to the designated SharePoint folder via Microsoft Graph API.
+4. Saving the output to a local OneDrive-synced folder so it appears in SharePoint automatically.
 
 ---
 
@@ -36,7 +36,7 @@ You save consultants time by:
 
 > **IMPORTANT**: Always load `docs/brand/brand-guide.md` from the repository before
 > generating any deck. Use the values below. If a master template exists at
-> `docs/brand/master-template.pptx`, use it as the `python-pptx` base.
+> `docs/brand/EPAM_PresalesTemplate.pptx`, use it as the `python-pptx` base.
 
 | Element              | Value                                      |
 |----------------------|--------------------------------------------|
@@ -100,8 +100,8 @@ Always note the source URL and date alongside each data point.
 file_search: docs/brand/brand-guide.md
 file_search: docs/brand/EPAM_PresalesTemplate.potx
 ```
-If the master template exists, use it as the base for `python-pptx`.
-If not, note this to the user and proceed with brand color/font defaults.
+If a `.pptx` template exists, use it as the base for `python-pptx`.
+If only a `.potx` exists, fall back to a new deck and apply brand defaults explicitly.
 
 ### Step 4 — Draft Slide Content
 For each slide in the standard structure:
@@ -111,7 +111,7 @@ For each slide in the standard structure:
 
 ### Step 5 — Generate the .pptx File
 Write and run a Python script using `python-pptx` to:
-1. Load `master-template.pptx` (or create from scratch if absent)
+1. Load `EPAM_PresalesTemplate.pptx` if available (or create from scratch if absent)
 2. Apply brand colors to title bars, backgrounds, and accent shapes
 3. Insert slide content for each section
 4. Embed the company logo on cover and back slides
@@ -124,10 +124,10 @@ from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from datetime import date
 
-TEMPLATE_PATH = "docs/brand/EPAM_PresalesTemplate.potx"
+TEMPLATE_PATH = "docs/brand/EPAM_PresalesTemplate.pptx"
 OUTPUT_PATH = f"output/{capability_name}-deck-{date.today()}.pptx"
 
-prs = Presentation(TEMPLATE_PATH)
+prs = Presentation(TEMPLATE_PATH) if TEMPLATE_PATH.endswith(".pptx") else Presentation()
 # ... slide generation logic per brand guide ...
 prs.save(OUTPUT_PATH)
 ```
@@ -142,22 +142,22 @@ Before delivering, verify:
 - [ ] File named correctly: `[CAPABILITY-NAME]-deck-[YYYY-MM-DD].pptx`
 
 ### Step 7 — Save to SharePoint
-Upload the generated file to SharePoint using Microsoft Graph API.
+Use free no-Entra upload mode by default.
 
 **Target location**: `https://epam.sharepoint.com/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS/`
 
 See `docs/config/sharepoint-config.md` for:
 - Full SharePoint site and folder details
-- Authentication setup (Azure App Registration vs delegated auth)
-- Environment variable configuration
+- Free mode sync setup (OneDrive local sync folder)
+- Optional advanced Graph API mode
 
-The upload script will:
-1. Authenticate using credentials from GitHub Secrets or env vars (never hardcoded)
-2. Call Microsoft Graph API to upload the `.pptx` to the correct folder
-3. Confirm the upload and return the SharePoint URL to the user
+In free mode, the runtime flow is:
+1. Save the generated `.pptx` into the local synced folder path
+2. Wait for OneDrive sync to upload it to SharePoint
+3. Return the SharePoint folder URL and expected file URL to the user
 
-> **Note**: Secrets (client ID, client secret) must be stored in GitHub Secrets or
-> environment variables — never commit them to the repository.
+> **Note**: Graph API auth is optional advanced mode. The default MVP requires no
+> Entra app registration.
 
 ---
 

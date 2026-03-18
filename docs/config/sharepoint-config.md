@@ -12,7 +12,13 @@
 
 ## Upload Behavior
 
-When the agent generates a `.pptx` file, it will be saved to:
+Default mode (free no-Entra):
+
+1. Generate `.pptx` locally
+2. Save to local OneDrive-synced folder
+3. OneDrive sync uploads to SharePoint automatically
+
+When the deck arrives in SharePoint, it will be available at:
 
 ```
 https://epam.sharepoint.com/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS/[CAPABILITY-NAME]-deck-[YYYY-MM-DD].pptx
@@ -25,9 +31,21 @@ Data-Analytics-deck-2026-03-18.pptx
 
 ---
 
-## Authentication (For Automated Uploads)
+## Authentication Modes
 
-To enable automatic uploads to SharePoint, you need:
+### Default Mode: No Entra App Registration
+
+No Graph credentials are required in this mode.
+Set only these environment values in the portal runtime:
+
+```
+SHAREPOINT_SYNC_DIR=C:\Path\To\Synced\PPTS
+SHAREPOINT_FOLDER_URL=https://epam.sharepoint.com/sites/CPGOpportunities/Shared%20Documents/AI%20Agent%20MVP/PPTS
+```
+
+### Optional Advanced Mode: Microsoft Graph API
+
+Use this only if you need server-side direct uploads without local OneDrive sync.
 
 ### Option 1: Microsoft Graph API with App Registration
 This is the recommended approach for shared/automated workflows.
@@ -43,28 +61,29 @@ This is the recommended approach for shared/automated workflows.
    ```
 4. The agent will use the Microsoft Graph API to upload files
 
-### Option 2: Delegated Authentication (User-based)
-For manual workflows where the user uploads manually:
-1. The agent generates the `.pptx` file locally
+### Optional Delegated Mode (User-based)
+For manual workflows:
+1. The app generates the `.pptx` file locally
 2. User authenticates to SharePoint via browser
-3. User or Power Automate flow uploads the file
+3. User uploads manually if needed
 
 ---
 
 ## Status
 
 - [x] SharePoint folder identified
-- [ ] Azure App Registration created (for automated uploads)
-- [ ] Service principal secrets configured (in GitHub Secrets, never in code)
-- [ ] Power Automate flow created (optional — for hands-free uploads)
+- [x] Free no-Entra mode documented (OneDrive sync)
+- [ ] Azure App Registration created (optional advanced mode)
+- [ ] Service principal secrets configured (optional advanced mode)
+- [ ] Power Automate flow created (optional)
 
 ---
 
 ## Notes
 
-- The URL provided includes query parameters and view IDs — these are for direct browsing and are ignored during API uploads
-- The clean path for API calls is: `/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS`
-- The agent will create the folder structure if it doesn't exist (provided it has write permissions)
+- The URL provided includes query parameters and view IDs — these are for direct browsing
+- The clean path for sync and links is: `/Shared Documents/AI Agent MVP/PPTS`
+- In default mode, folder structure must already exist in the synced SharePoint library
 
 ---
 

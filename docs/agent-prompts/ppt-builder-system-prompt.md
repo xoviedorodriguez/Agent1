@@ -105,16 +105,16 @@ The AI will remember these for the rest of the conversation.
 
 ## Saving the Output to SharePoint
 
-Generated PPTs are automatically uploaded to:
+Generated PPTs are saved and shared through this SharePoint folder:
 **https://epam.sharepoint.com/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS/**
 
-The agent will:
-1. Generate the `.pptx` file locally using the EPAM template
-2. Authenticate to SharePoint using Microsoft Graph API
-3. Upload the file to the PPTS folder
-4. Send you a SharePoint link to the completed presentation
+In free no-Entra mode, the workflow is:
+1. Generate the `.pptx` file locally
+2. Save the file into a local OneDrive-synced folder
+3. Let OneDrive sync the file to SharePoint automatically
+4. Send users the SharePoint folder or direct file link
 
-No manual upload needed — everything is automated.
+No app registration is required for this mode.
 
 ---
 
