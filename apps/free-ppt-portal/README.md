@@ -8,10 +8,21 @@ This portal gives your team a simple web page:
 
 ## How It Works
 
-- The app generates a `.pptx` file using `python-pptx`
+- The app gathers online information for the topic
+- It captures source URLs and writes them into the deck (Sources slide + speaker notes)
+- It builds a branded deck with EPAM colors and logo (if available)
+- It uses a `.pptx` template when available; otherwise it applies a branded fallback layout
 - The user enters a local folder path in the form
-- The app saves the deck directly in that folder
-- The UI confirms the exact saved file path
+- The app saves the deck directly in that folder and shows the exact local path
+
+## Generation Steps (Enforced)
+
+1. **Gather online information**
+2. **Collect and expose source links**
+3. **Build deck structure and content**
+4. **Apply brand and logo**
+5. **Use template if compatible**
+6. **Save deck in selected local folder**
 
 ## Prerequisites
 
@@ -65,10 +76,11 @@ Share the generated HTTPS URL with the team.
 ## Notes
 
 - This is MVP mode and intentionally simple.
-- Current version creates a structured 9-slide draft deck.
+- Current version creates a structured 10-slide draft deck, including a Sources slide.
 - You can later connect the full research/agent pipeline behind the same form.
 - `python-pptx` does not open `.potx` directly. For strict template fidelity,
   save a `.pptx` version of the template and point `PPT_TEMPLATE_PATH` to it.
+- Internet access is required for online research and source collection.
 
 ## Troubleshooting
 

@@ -186,7 +186,19 @@
         <div><strong>Deck generated:</strong> {{ file_name }}</div>
         <div><strong>Saved folder:</strong> {{ saved_folder }}</div>
         <div><strong>Saved locally at:</strong> {{ local_file_path }}</div>
+        <div><strong>Template:</strong> {{ template_status }}</div>
+        <div><strong>Brand assets:</strong> {{ logo_status }}</div>
         <div style="margin-top: 8px;"><strong>Next step:</strong> Open the folder path above to find your PPT.</div>
+        <div style="margin-top: 12px;"><strong>Sources used:</strong></div>
+        {% if sources and sources|length > 0 %}
+          <ul>
+            {% for src in sources %}
+              <li><a href="{{ src.url }}" target="_blank" rel="noopener noreferrer">{{ src.title }}</a></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div>No online sources were available during this run.</div>
+        {% endif %}
       </div>
     {% endif %}
   </div>
