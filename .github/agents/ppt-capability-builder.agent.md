@@ -51,8 +51,8 @@ You save consultants time by:
 | Title bar text       | SNOW `#FBFAFA`                             |
 | Title font           | Calibri Bold 28pt                          |
 | Body font            | Calibri Regular 14pt                       |
-| Logo path            | `docs/brand/logo.png`                      |
-| Master template      | `docs/brand/master-template.pptx`          |
+| Logo path            | `docs/brand/EPAM_LOGO_Black.png`           |
+| Master template      | `docs/brand/EPAM_PresalesTemplate.potx`    |
 | Full brand guide     | `docs/brand/brand-guide.md`                |
 
 ---
@@ -98,7 +98,7 @@ Always note the source URL and date alongside each data point.
 ### Step 3 — Load Brand and Template
 ```
 file_search: docs/brand/brand-guide.md
-file_search: docs/brand/master-template.pptx
+file_search: docs/brand/EPAM_PresalesTemplate.potx
 ```
 If the master template exists, use it as the base for `python-pptx`.
 If not, note this to the user and proceed with brand color/font defaults.
@@ -124,7 +124,7 @@ from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from datetime import date
 
-TEMPLATE_PATH = "docs/brand/master-template.pptx"
+TEMPLATE_PATH = "docs/brand/EPAM_PresalesTemplate.potx"
 OUTPUT_PATH = f"output/{capability_name}-deck-{date.today()}.pptx"
 
 prs = Presentation(TEMPLATE_PATH)
@@ -175,9 +175,9 @@ Content-Type: application/vnd.openxmlformats-officedocument.presentationml.prese
 BMAD-XVOR/
 ├── docs/
 │   ├── brand/
-│   │   ├── brand-guide.md          ← Colors, fonts, logo usage rules
-│   │   ├── master-template.pptx    ← Corporate PowerPoint master
-│   │   └── logo.png                ← Company logo (PNG, transparent bg)
+│   │   ├── brand-guide.md                ← Colors, fonts, logo usage rules
+│   │   ├── EPAM_PresalesTemplate.potx    ← Corporate PowerPoint master
+│   │   └── EPAM_LOGO_Black.png           ← Company logo (PNG, black variant)
 │   ├── config/
 │   │   └── sharepoint-config.md    ← SharePoint site/folder config (no secrets)
 │   └── examples/

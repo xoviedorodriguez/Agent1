@@ -56,7 +56,8 @@ work required.
 | Title bar bg      | COBALT `#0047FF` with SNOW `#FBFAFA` text                  |
 | Title font        | Calibri Bold 28pt                                          |
 | Body font         | Calibri Regular 14pt                                       |
-| Logo placement    | Top-right on Cover and Back Cover slides                   |
+| Logo file         | `EPAM_LOGO_Black.png` — top-right on cover/back slides    |
+| Template file     | `EPAM_PresalesTemplate.potx`                               |
 
 ## QUALITY GATE — Before delivering, confirm:
 

@@ -39,7 +39,7 @@
 
 ## Logo
 
-- File: `docs/brand/logo.png`
+- File: `docs/brand/EPAM_LOGO_Black.png`
 - Placement: top-right corner on Cover and Back Cover slides
 - Minimum clear space: 16px on all sides
 - Never stretch, recolor, or place on a busy background
@@ -62,7 +62,7 @@
 
 ## Master Template
 
-- File: `docs/brand/master-template.pptx`
+- File: `docs/brand/EPAM_PresalesTemplate.potx`
 - All generated decks must be based on this template.
 - If the template is absent, use the color and font rules above with `python-pptx`.
 
