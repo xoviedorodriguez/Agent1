@@ -21,7 +21,7 @@ This portal gives your team a simple web page:
 2. **Collect and expose source links**
 3. **Build deck structure and content**
 4. **Apply brand and logo**
-5. **Use template if compatible**
+5. **Use template (including `.potx` to `.pptx` conversion on Windows when possible)**
 6. **Save deck in selected local folder**
 
 ## Prerequisites
@@ -78,8 +78,8 @@ Share the generated HTTPS URL with the team.
 - This is MVP mode and intentionally simple.
 - Current version creates a structured 10-slide draft deck, including a Sources slide.
 - You can later connect the full research/agent pipeline behind the same form.
-- `python-pptx` does not open `.potx` directly. For strict template fidelity,
-  save a `.pptx` version of the template and point `PPT_TEMPLATE_PATH` to it.
+- If PowerPoint is installed on Windows, `.potx` templates are converted at runtime to `.pptx`.
+- If template conversion fails, the app falls back to branded layout and reports that status.
 - Internet access is required for online research and source collection.
 
 ## Troubleshooting

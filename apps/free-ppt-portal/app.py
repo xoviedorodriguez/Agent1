@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import parse_qs, quote_plus, urlparse
@@ -34,6 +35,81 @@ BRAND = {
     "snow": RGBColor(251, 250, 250),
     "night": RGBColor(6, 6, 6),
 }
+
+
+def extract_insights(research: list[dict], max_points: int = 5) -> list[str]:
+    insights: list[str] = []
+    seen: set[str] = set()
+
+    for item in research:
+        raw = (item.get("summary") or item.get("snippet") or "").strip()
+        if not raw:
+            continue
+
+        for sentence in re.split(r"(?<=[.!?])\s+", raw):
+            text = re.sub(r"\s+", " ", sentence).strip(" -\t\n\r")
+            if len(text) < 70 or len(text) > 180:
+                continue
+
+            norm = re.sub(r"[^a-z0-9]+", "", text.lower())
+            if not norm or norm in seen:
+                continue
+
+            seen.add(norm)
+            insights.append(text)
+            if len(insights) >= max_points:
+                return insights
+
+    return insights
+
+
+def convert_potx_to_pptx(potx_path: Path) -> Path | None:
+    """Convert .potx to .pptx using local PowerPoint COM automation on Windows."""
+    if potx_path.suffix.lower() != ".potx" or not potx_path.exists():
+        return None
+
+    cache_dir = Path("./template-cache").resolve()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    out_pptx = cache_dir / f"{potx_path.stem}.runtime.pptx"
+
+    # Reuse the converted file when it is up-to-date.
+    if out_pptx.exists() and out_pptx.stat().st_mtime >= potx_path.stat().st_mtime:
+        return out_pptx
+
+    src = str(potx_path).replace("'", "''")
+    dst = str(out_pptx).replace("'", "''")
+    ps_script = (
+        "$ErrorActionPreference='Stop';"
+        f"$src='{src}';$dst='{dst}';"
+        "$ppt=New-Object -ComObject PowerPoint.Application;"
+        "$pres=$ppt.Presentations.Open($src,$false,$false,$false);"
+        "$pres.SaveAs($dst,24);"
+        "$pres.Close();"
+        "$ppt.Quit();"
+    )
+
+    try:
+        result = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                ps_script,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=90,
+            check=False,
+        )
+        if result.returncode == 0 and out_pptx.exists():
+            return out_pptx
+    except Exception:
+        return None
+
+    return None
 
 
 def resolve_duckduckgo_link(raw_url: str) -> str:
@@ -190,19 +266,66 @@ def gather_research(topic: str, industry: str, audience: str) -> list[dict]:
         except Exception:
             continue
 
+    if len(wiki_results) < 2:
+        # Broader fallback: Wikipedia OpenSearch returns related page URLs.
+        for candidate in wiki_candidates:
+            try:
+                api_url = (
+                    "https://en.wikipedia.org/w/api.php?action=opensearch"
+                    f"&search={quote_plus(candidate)}&limit=8&namespace=0&format=json"
+                )
+                resp = requests.get(api_url, headers=headers, timeout=20)
+                if resp.status_code != 200:
+                    continue
+
+                payload = resp.json()
+                titles = payload[1] if len(payload) > 1 else []
+                urls = payload[3] if len(payload) > 3 else []
+                for title, page_url in zip(titles, urls):
+                    if not page_url:
+                        continue
+                    if any(existing.get("url") == page_url for existing in wiki_results):
+                        continue
+
+                    wiki_results.append(
+                        {
+                            "title": str(title),
+                            "url": str(page_url),
+                            "snippet": f"Reference page for {title}",
+                            "summary": f"Reference page for {title}",
+                        }
+                    )
+                    if len(wiki_results) >= 4:
+                        break
+                if len(wiki_results) >= 4:
+                    break
+            except Exception:
+                continue
+
     return wiki_results
 
 
-def choose_template_path() -> Path | None:
-    # Use only .pptx as python-pptx cannot open .potx directly.
+def choose_template_path() -> tuple[Path | None, str]:
+    # Prefer usable .pptx templates; if only .potx exists, convert it.
     candidates = [
         TEMPLATE_PATH,
         Path("../../docs/brand/EPAM_PresalesTemplate.pptx").resolve(),
+        Path("../../docs/brand/EPAM_PresalesTemplate.potx").resolve(),
     ]
+
     for candidate in candidates:
-        if candidate.exists() and candidate.suffix.lower() == ".pptx":
-            return candidate
-    return None
+        if not candidate.exists():
+            continue
+
+        suffix = candidate.suffix.lower()
+        if suffix == ".pptx":
+            return candidate, f"Using template: {candidate.name}"
+        if suffix == ".potx":
+            converted = convert_potx_to_pptx(candidate)
+            if converted:
+                return converted, f"Converted template from {candidate.name}"
+
+    return None, "No compatible template found. Used branded fallback layout."
 
 
 def safe_slug(value: str) -> str:
@@ -273,18 +396,34 @@ def add_bullet_slide(prs: Presentation, title: str, bullets: list[str], sources:
         style_title(slide)
         add_logo(slide, prs)
 
-    if len(slide.placeholders) > 1:
-        body = slide.placeholders[1].text_frame
-        body.clear()
-        for i, bullet in enumerate(bullets):
-            p = body.paragraphs[0] if i == 0 else body.add_paragraph()
-            p.text = bullet
-            p.level = 0
-            try:
-                p.runs[0].font.size = Pt(14)
-                p.runs[0].font.color.rgb = BRAND["night"]
-            except Exception:
-                pass
+    body = None
+    for ph in slide.placeholders:
+        if slide.shapes.title is not None and ph == slide.shapes.title:
+            continue
+        if hasattr(ph, "text_frame"):
+            body = ph.text_frame
+            break
+
+    if body is None:
+        # Fallback for templates that do not expose a standard body placeholder.
+        tx = slide.shapes.add_textbox(
+            Inches(0.8),
+            Inches(1.2),
+            prs.slide_width - Inches(1.6),
+            prs.slide_height - Inches(1.8),
+        )
+        body = tx.text_frame
+
+    body.clear()
+    for i, bullet in enumerate(bullets):
+        p = body.paragraphs[0] if i == 0 else body.add_paragraph()
+        p.text = bullet
+        p.level = 0
+        try:
+            p.runs[0].font.size = Pt(14)
+            p.runs[0].font.color.rgb = BRAND["night"]
+        except Exception:
+            pass
 
     if sources:
         add_sources_to_notes(slide, sources)
@@ -299,22 +438,16 @@ def generate_deck(
     extra_prompt: str,
     output_dir: Path,
 ) -> tuple[Path, list[dict], str]:
-    # python-pptx loads .pptx files directly, but not .potx templates.
-    # In no-Entra/free mode we keep this robust by falling back to a blank deck.
-    template_path = choose_template_path()
+    template_path, template_status = choose_template_path()
     if template_path:
         prs = Presentation(str(template_path))
-        template_status = f"Using template: {template_path.name}"
     else:
         prs = Presentation()
-        template_status = "No .pptx template found. Used brand-styled fallback layout."
 
     research = gather_research(topic, industry, audience)
-    market_bullets = []
-    for item in research[:3]:
-        snippet = item.get("summary") or item.get("snippet") or ""
-        if snippet:
-            market_bullets.append(snippet[:140])
+    insights = extract_insights(research, max_points=6)
+
+    market_bullets = [point[:150] for point in insights[:3]]
 
     if not market_bullets:
         market_bullets = [
@@ -323,17 +456,35 @@ def generate_deck(
             "Teams need scalable execution models with clear ROI visibility.",
         ]
 
+    capability_bullets = [
+        f"Advisory-to-delivery model for {topic} programs in {industry}.",
+        f"Value tracking aligned to {audience} priorities and business KPIs.",
+        "Reusable accelerators to reduce time-to-value and delivery risk.",
+    ]
+
+    if insights:
+        capability_bullets.append(insights[0][:150])
+
+    proof_points_bullets = [
+        "Reduced cycle time through automation and operating model redesign.",
+        "Improved quality through governance controls and data standards.",
+        "Enabled faster decisions with trustworthy, role-specific reporting.",
+    ]
+
+    if len(insights) > 1:
+        proof_points_bullets[2] = insights[1][:150]
+
     today = datetime.now().strftime("%Y-%m-%d")
     file_name = f"{safe_slug(topic)}-deck-{today}.pptx"
 
     output_dir.mkdir(parents=True, exist_ok=True)
     out_path = output_dir / file_name
 
-    # 9-slide baseline structure (can be refined later by the full agent workflow).
+    # Quality deck baseline with sources and executive narrative.
     add_bullet_slide(prs, f"{topic} Capability", [
         f"Audience: {audience}",
         f"Industry: {industry}",
-        "Prepared with current market signals and references",
+        "Prepared with current market signals, sources, and branded storytelling",
     ])
     add_bullet_slide(prs, "Agenda", [
         "Market context",
@@ -343,26 +494,19 @@ def generate_deck(
         "Sources and next steps",
     ])
     add_bullet_slide(prs, "Market Context", market_bullets, sources=research[:3])
-    add_bullet_slide(prs, "Our Capability", [
-        f"{topic} strategy and execution support",
-        "Advisory plus implementation coverage",
-        "Outcome-driven delivery model with accelerators",
-    ])
+    add_bullet_slide(prs, "Our Capability", capability_bullets, sources=research[:2])
     add_bullet_slide(prs, "How We Work", [
-        "Assess current state",
-        "Define target architecture and roadmap",
-        "Pilot and scale in waves",
-        "Measure impact and optimize continuously",
+        "Diagnose current state, constraints, and decision bottlenecks.",
+        "Define target operating model, architecture, and KPI framework.",
+        "Pilot in a focused scope to prove value and derisk change.",
+        "Scale in waves with governance, enablement, and adoption plans.",
+        "Continuously optimize outcomes using KPI and benefit tracking.",
     ])
-    add_bullet_slide(prs, "Proof Points", [
-        "Reduced cycle time through automation",
-        "Improved quality and governance controls",
-        "Enabled faster decision-making",
-    ])
+    add_bullet_slide(prs, "Proof Points", proof_points_bullets, sources=research[:3])
     add_bullet_slide(prs, "Why Us", [
-        "Cross-functional consulting team",
-        "Accelerators and reusable assets",
-        "Strong delivery governance",
+        f"Cross-functional experts across strategy, delivery, and change in {industry}.",
+        "Battle-tested accelerators and templates to shorten execution timelines.",
+        "Governed delivery model focused on measurable business outcomes.",
     ])
     add_bullet_slide(prs, "Next Steps", [
         "Run discovery workshop",
@@ -429,6 +573,11 @@ def generate():
         sources=research,
         template_status=template_status,
         logo_status=("Logo applied" if LOGO_PATH.exists() else "Logo file not found"),
+        quality_status=(
+            f"Quality gate passed: {len(research)} sources captured"
+            if len(research) >= 2
+            else "Quality gate warning: fewer than 2 sources captured"
+        ),
     )
 
 

@@ -28,7 +28,7 @@ You save consultants time by:
 2. Structuring the content following the approved corporate slide standard.
 3. Generating a `.pptx` file using Python and `python-pptx` that applies the company's
    brand colors, fonts, and layout conventions from the master template.
-4. Saving the output to a local OneDrive-synced folder so it appears in SharePoint automatically.
+4. Saving the output to the user-selected local folder on that machine.
 
 ---
 
@@ -52,7 +52,7 @@ You save consultants time by:
 | Title font           | Calibri Bold 28pt                          |
 | Body font            | Calibri Regular 14pt                       |
 | Logo path            | `docs/brand/EPAM_LOGO_Black.png`           |
-| Master template      | `docs/brand/EPAM_PresalesTemplate.potx`    |
+| Master template      | `docs/brand/EPAM_PresalesTemplate.potx` (convert to `.pptx` at runtime if needed) |
 | Full brand guide     | `docs/brand/brand-guide.md`                |
 
 ---
@@ -101,13 +101,19 @@ file_search: docs/brand/brand-guide.md
 file_search: docs/brand/EPAM_PresalesTemplate.potx
 ```
 If a `.pptx` template exists, use it as the base for `python-pptx`.
-If only a `.potx` exists, fall back to a new deck and apply brand defaults explicitly.
+If only a `.potx` exists, convert it to `.pptx` first (Windows PowerPoint COM), then use it.
+Only fall back to a fresh branded deck if conversion fails.
 
 ### Step 4 — Draft Slide Content
 For each slide in the standard structure:
 - Write a concise **headline** (max 10 words, action or insight-oriented)
-- Write **3–5 supporting bullets** (max 15 words each)
+- Write **3–5 supporting bullets** (max 18 words each) with executive narrative quality
 - Flag which slides need **visuals** (diagrams, icons, charts) the user should review
+
+Content quality requirements:
+- Avoid generic lines like "improve efficiency" without context.
+- Tie each claim to industry context and audience priorities.
+- Include at least 2 source-backed insights across Market Context and Proof Points.
 
 ### Step 5 — Generate the .pptx File
 Write and run a Python script using `python-pptx` to:
@@ -115,7 +121,8 @@ Write and run a Python script using `python-pptx` to:
 2. Apply brand colors to title bars, backgrounds, and accent shapes
 3. Insert slide content for each section
 4. Embed the company logo on cover and back slides
-5. Save as `output/[CAPABILITY-NAME]-deck-[YYYY-MM-DD].pptx`
+5. Add a Sources slide and citations in speaker notes
+6. Save to the user-selected local output folder
 
 ```python
 # Example scaffold — expand per actual brand values
@@ -125,7 +132,7 @@ from pptx.dml.color import RGBColor
 from datetime import date
 
 TEMPLATE_PATH = "docs/brand/EPAM_PresalesTemplate.pptx"
-OUTPUT_PATH = f"output/{capability_name}-deck-{date.today()}.pptx"
+OUTPUT_PATH = f"{chosen_output_folder}/{capability_name}-deck-{date.today()}.pptx"
 
 prs = Presentation(TEMPLATE_PATH) if TEMPLATE_PATH.endswith(".pptx") else Presentation()
 # ... slide generation logic per brand guide ...
@@ -134,30 +141,18 @@ prs.save(OUTPUT_PATH)
 
 ### Step 6 — Quality Gate
 Before delivering, verify:
-- [ ] All 9 standard slides are present (or agreed exceptions documented)
+- [ ] All standard slides are present, plus Sources slide
 - [ ] Brand colors applied consistently — no off-brand colors
 - [ ] Fonts match the brand guide
 - [ ] No placeholder text (`[INSERT...]`) left in slides
 - [ ] All research data points have source citations in speaker notes
+- [ ] At least 2 unique source URLs are included
+- [ ] Template used successfully, or explicit fallback reason provided
 - [ ] File named correctly: `[CAPABILITY-NAME]-deck-[YYYY-MM-DD].pptx`
 
-### Step 7 — Save to SharePoint
-Use free no-Entra upload mode by default.
-
-**Target location**: `https://epam.sharepoint.com/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS/`
-
-See `docs/config/sharepoint-config.md` for:
-- Full SharePoint site and folder details
-- Free mode sync setup (OneDrive local sync folder)
-- Optional advanced Graph API mode
-
-In free mode, the runtime flow is:
-1. Save the generated `.pptx` into the local synced folder path
-2. Wait for OneDrive sync to upload it to SharePoint
-3. Return the SharePoint folder URL and expected file URL to the user
-
-> **Note**: Graph API auth is optional advanced mode. The default MVP requires no
-> Entra app registration.
+### Step 7 — Save Locally
+Save the generated file to the folder selected by the user in the portal form.
+Return the exact local file path in the success message.
 
 ---
 
@@ -166,7 +161,7 @@ In free mode, the runtime flow is:
 - **Never fabricate statistics.** Only include data points sourced from a real URL retrieved during Step 2. Cite every fact in speaker notes.
 - **Never override brand colors** unless the user explicitly requests it.
 - **Always anonymize** client names in case studies unless the user explicitly approves disclosure.
-- **Keep slides lean**: max 5 bullets per slide, max 15 words per bullet. Depth belongs in speaker notes.
+- **Keep slides lean**: max 5 bullets per slide, max 18 words per bullet. Depth belongs in speaker notes.
 - **Confidential slides**: If any content is marked confidential by the user, add a "CONFIDENTIAL" watermark and exclude it from any public SharePoint folder.
 - **Surface assumptions**: If a source document, brand asset, or standard is missing, say so clearly before proceeding — don't silently skip it.
 
@@ -181,8 +176,6 @@ BMAD-XVOR/
 │   │   ├── brand-guide.md                ← Colors, fonts, logo usage rules
 │   │   ├── EPAM_PresalesTemplate.potx    ← Corporate PowerPoint master
 │   │   └── EPAM_LOGO_Black.png           ← Company logo (PNG, black variant)
-│   ├── config/
-│   │   └── sharepoint-config.md    ← SharePoint site/folder config (no secrets)
 │   └── examples/
 │       └── *.pptx                  ← Reference decks for tone and style
 └── output/
