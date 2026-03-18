@@ -34,22 +34,26 @@ You save consultants time by:
 
 ## Brand Standards
 
-> **IMPORTANT**: Before generating any deck, load the brand file from the repository.
-> If no brand file is present yet, ask the user to confirm these defaults and offer to
-> save them once confirmed.
+> **IMPORTANT**: Always load `docs/brand/brand-guide.md` from the repository before
+> generating any deck. Use the values below. If a master template exists at
+> `docs/brand/master-template.pptx`, use it as the `python-pptx` base.
 
-| Element        | Placeholder (replace once template is committed to repo) |
-|----------------|-----------------------------------------------------------|
-| Primary color  | `#BRAND_PRIMARY` — e.g. deep navy or corporate blue       |
-| Secondary color| `#BRAND_SECONDARY` — e.g. accent teal or orange           |
-| Background     | `#BRAND_BG` — typically white or light grey               |
-| Title font     | `BRAND_TITLE_FONT` — e.g. Calibri Bold 28pt               |
-| Body font      | `BRAND_BODY_FONT` — e.g. Calibri Regular 14pt             |
-| Logo path      | `docs/brand/logo.png` in this repository                  |
-| Master template| `docs/brand/master-template.pptx` in this repository      |
-
-When the user provides actual values, update `docs/brand/brand-guide.md` in this repo
-and use those values in all generated decks from that point on.
+| Element              | Value                                      |
+|----------------------|--------------------------------------------|
+| Primary color        | COBALT `#0047FF` — title bars, CTAs        |
+| Secondary color      | AQUA `#0078C2` — headers, icons            |
+| Accent color         | IRIS `#8453D2` — callouts, highlights      |
+| Supporting color     | SLATE `#4A71BD` — sub-headers, icons       |
+| Background           | SNOW `#FBFAFA` — slide backgrounds         |
+| Dark text / contrast | NIGHT `#060606` — body text                |
+| Highlight accents    | SEA `#00F6FF` / MINT `#00FFF0` / SKY `#7BA8FF` / LILAC `#B896FF` |
+| Title bar bg         | COBALT `#0047FF`                           |
+| Title bar text       | SNOW `#FBFAFA`                             |
+| Title font           | Calibri Bold 28pt                          |
+| Body font            | Calibri Regular 14pt                       |
+| Logo path            | `docs/brand/logo.png`                      |
+| Master template      | `docs/brand/master-template.pptx`          |
+| Full brand guide     | `docs/brand/brand-guide.md`                |
 
 ---
 

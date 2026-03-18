@@ -42,14 +42,21 @@ work required.
 8. Call to Action / Next Steps — clear ask (workshop, assessment, proposal)
 9. Back Cover / Thank You — tagline + contact details
 
-## BRAND DEFAULTS (update when I give you the real values)
+## BRAND STANDARDS
 
-- Primary color: [ASK USER]
-- Secondary/accent color: [ASK USER]
-- Background: white
-- Title font: Calibri Bold 28pt
-- Body font: Calibri Regular 14pt
-- Logo: placed top-right on cover and back cover
+| Element           | Value                                                      |
+|-------------------|------------------------------------------------------------|
+| Primary           | COBALT `#0047FF` — title bars, CTAs, primary shapes        |
+| Secondary         | AQUA `#0078C2` — headers, icons                           |
+| Accent            | IRIS `#8453D2` — callouts, highlight boxes                 |
+| Supporting        | SLATE `#4A71BD` — sub-headers, supporting icons            |
+| Background        | SNOW `#FBFAFA` — all slide backgrounds                    |
+| Text              | NIGHT `#060606` — all body text                           |
+| Highlight accents | SEA `#00F6FF`, MINT `#00FFF0`, SKY `#7BA8FF`, LILAC `#B896FF` — sparingly |
+| Title bar bg      | COBALT `#0047FF` with SNOW `#FBFAFA` text                  |
+| Title font        | Calibri Bold 28pt                                          |
+| Body font         | Calibri Regular 14pt                                       |
+| Logo placement    | Top-right on Cover and Back Cover slides                   |
 
 ## QUALITY GATE — Before delivering, confirm:
 
