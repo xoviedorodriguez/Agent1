@@ -1,0 +1,34 @@
+name: PRD Request
+description: Capture a product request before implementation starts.
+title: "PRD: "
+labels:
+  - prd
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are we solving?
+    validations:
+      required: true
+  - type: textarea
+    id: users
+    attributes:
+      label: Users
+      description: Who is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: MVP Scope
+      description: What is in and out of scope?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: List the measurable outcomes.
+    validations:
+      required: true
