@@ -142,19 +142,22 @@ Before delivering, verify:
 - [ ] File named correctly: `[CAPABILITY-NAME]-deck-[YYYY-MM-DD].pptx`
 
 ### Step 7 — Save to SharePoint
-Upload the generated file to SharePoint using Microsoft Graph API:
-```
-POST https://graph.microsoft.com/v1.0/sites/{site-id}/drives/{drive-id}/root:/{folder-path}/{filename}:/content
-Authorization: Bearer {access_token}
-Content-Type: application/vnd.openxmlformats-officedocument.presentationml.presentation
-```
+Upload the generated file to SharePoint using Microsoft Graph API.
 
-> **Setup note**: The first time this runs, the user must provide:
-> - SharePoint site URL
-> - Target folder path (e.g., `/Shared Documents/Capabilities/`)
-> - App registration credentials (client ID + secret) OR delegated auth token
->
-> Store these in `docs/config/sharepoint-config.md` (never commit secrets — use env vars or GitHub Secrets).
+**Target location**: `https://epam.sharepoint.com/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS/`
+
+See `docs/config/sharepoint-config.md` for:
+- Full SharePoint site and folder details
+- Authentication setup (Azure App Registration vs delegated auth)
+- Environment variable configuration
+
+The upload script will:
+1. Authenticate using credentials from GitHub Secrets or env vars (never hardcoded)
+2. Call Microsoft Graph API to upload the `.pptx` to the correct folder
+3. Confirm the upload and return the SharePoint URL to the user
+
+> **Note**: Secrets (client ID, client secret) must be stored in GitHub Secrets or
+> environment variables — never commit them to the repository.
 
 ---
 

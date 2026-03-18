@@ -105,15 +105,16 @@ The AI will remember these for the rest of the conversation.
 
 ## Saving the Output to SharePoint
 
-The AI will generate the slide-by-slide text content and a Python script to build the
-`.pptx` file. To save it to SharePoint:
+Generated PPTs are automatically uploaded to:
+**https://epam.sharepoint.com/sites/CPGOpportunities/Shared Documents/AI Agent MVP/PPTS/**
 
-1. **Option A (no-code)**: Copy the slide content into your corporate PowerPoint template manually — 
-   the AI will organize it so this takes under 10 minutes.
-2. **Option B (automated)**: Share your SharePoint folder link with the AI and ask it to
-   generate a Microsoft Graph API upload script. Your IT team can run this once and schedule it.
-3. **Option C (Power Automate)**: Ask the AI to draft a Power Automate flow that watches an
-   `output/` folder and automatically uploads new `.pptx` files to SharePoint.
+The agent will:
+1. Generate the `.pptx` file locally using the EPAM template
+2. Authenticate to SharePoint using Microsoft Graph API
+3. Upload the file to the PPTS folder
+4. Send you a SharePoint link to the completed presentation
+
+No manual upload needed — everything is automated.
 
 ---
 
