@@ -137,7 +137,7 @@
   <div class="card">
     <div class="header">
       <h1>PPT Capability Builder</h1>
-      <p>Fill in the brief, click Generate, and open SharePoint for your deck.</p>
+      <p>Fill in the brief, choose your save folder, and generate the deck locally.</p>
     </div>
 
     <form action="/generate" method="post">
@@ -162,13 +162,18 @@
       </div>
 
       <div class="full">
+        <label for="output_folder">Output Folder (required)</label>
+        <input id="output_folder" name="output_folder" placeholder="Example: C:\\Users\\YourName\\Documents\\GeneratedDecks" value="{{ (form.output_folder if form else default_output_dir) }}" required>
+      </div>
+
+      <div class="full">
         <label for="notes">Extra Context (optional)</label>
         <textarea id="notes" name="notes" placeholder="Any additional context for future versions"></textarea>
       </div>
 
       <div class="actions">
         <button type="submit">Generate Deck</button>
-        <span class="note">Free mode: saves into SharePoint-synced folder (no Entra app).</span>
+        <span class="note">Local mode: deck is saved on this computer in the folder you choose.</span>
       </div>
     </form>
 
@@ -179,14 +184,9 @@
     {% if success %}
       <div class="msg ok">
         <div><strong>Deck generated:</strong> {{ file_name }}</div>
+        <div><strong>Saved folder:</strong> {{ saved_folder }}</div>
         <div><strong>Saved locally at:</strong> {{ local_file_path }}</div>
-        {% if using_fallback_dir %}
-        <div style="margin-top: 8px;"><strong>Sync not configured:</strong> The app is currently saving to a local fallback folder. Set <code>SHAREPOINT_SYNC_DIR</code> to your OneDrive-synced SharePoint folder, then restart the app.</div>
-        {% endif %}
-        <div>Go to SharePoint folder:</div>
-        <div><a href="{{ sharepoint_folder }}" target="_blank" rel="noopener noreferrer">{{ sharepoint_folder }}</a></div>
-        <div style="margin-top: 10px;">Direct file link (after sync finishes):</div>
-        <div><a href="{{ sharepoint_file }}" target="_blank" rel="noopener noreferrer">{{ sharepoint_file }}</a></div>
+        <div style="margin-top: 8px;"><strong>Next step:</strong> Open the folder path above to find your PPT.</div>
       </div>
     {% endif %}
   </div>

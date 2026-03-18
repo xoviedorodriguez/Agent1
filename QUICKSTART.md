@@ -1,4 +1,4 @@
-# Quick Start — Free PPT Portal (No Entra)
+# Quick Start — Free PPT Portal (Local Save)
 
 This is the easiest team path now.
 No VS Code required for end users.
@@ -9,8 +9,9 @@ No VS Code required for end users.
 
 1. Open the portal URL in a browser
 2. Fill topic, audience, and industry
+3. Choose the output folder on their computer
 3. Click **Generate Deck**
-4. Open the SharePoint link shown in the success message
+4. Open the local file path shown in the success message
 
 ---
 
@@ -25,11 +26,10 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Set environment variables:
+Optional environment variables:
 
 ```powershell
-$env:SHAREPOINT_SYNC_DIR="C:\Path\To\Synced\PPTS"
-$env:SHAREPOINT_FOLDER_URL="https://epam.sharepoint.com/sites/CPGOpportunities/Shared%20Documents/AI%20Agent%20MVP/PPTS"
+$env:DEFAULT_OUTPUT_DIR="C:\Path\For\Default\Decks"
 $env:PPT_TEMPLATE_PATH="C:\Users\XimenaOviedo\BMAD-XVOR\docs\brand\EPAM_PresalesTemplate.pptx"
 ```
 
@@ -64,9 +64,9 @@ Share the generated HTTPS URL with the team.
 
 ## Notes
 
-- Free mode uses OneDrive sync for SharePoint upload (no Entra app registration).
+- Free mode saves directly to a local folder selected by the user.
 - For best template fidelity, point `PPT_TEMPLATE_PATH` to a `.pptx` copy of your template.
-- Current portal generates a branded 9-slide draft and provides SharePoint links.
+- Current portal generates a branded 9-slide draft and shows the local saved path.
 
 ---
 
@@ -78,4 +78,4 @@ https://github.com/xoviedorodriguez/Agent1
 
 ## Version
 
-v1.1 — March 2026 — Free Portal Edition
+v1.2 — March 2026 — Local Save Edition

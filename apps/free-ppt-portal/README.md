@@ -1,25 +1,22 @@
-# Free PPT Portal (No Entra)
+# Free PPT Portal (Local Save)
 
-This portal gives your team a simple public-like web page:
+This portal gives your team a simple web page:
 1. Fill in topic and audience
-2. Click **Generate Deck**
-3. See a message with the SharePoint folder link
+2. Choose an output folder on that computer
+3. Click **Generate Deck**
+4. Open the saved `.pptx` from the path shown in the success message
 
 ## How It Works
 
 - The app generates a `.pptx` file using `python-pptx`
-- It saves the file into a **local SharePoint-synced folder**
-- OneDrive sync uploads the deck to SharePoint automatically
-- The UI shows users where to find the deck
-
-No Entra app registration is required.
+- The user enters a local folder path in the form
+- The app saves the deck directly in that folder
+- The UI confirms the exact saved file path
 
 ## Prerequisites
 
-1. A machine that stays online and runs this app
-2. OneDrive signed in with access to your SharePoint library
-3. SharePoint library synced locally (Folder path visible in File Explorer)
-4. Python 3.10+
+1. A machine that runs this app
+2. Python 3.10+
 
 ## Setup
 
@@ -32,12 +29,11 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Set environment variables:
+Optional environment variables:
 
 ```powershell
-$env:SHAREPOINT_SYNC_DIR="C:\\Path\\To\\Synced\\PPTS"
-$env:SHAREPOINT_FOLDER_URL="https://epam.sharepoint.com/sites/CPGOpportunities/Shared%20Documents/AI%20Agent%20MVP/PPTS"
-$env:PPT_TEMPLATE_PATH="C:\\Users\\XimenaOviedo\\BMAD-XVOR\\docs\\brand\\EPAM_PresalesTemplate.potx"
+$env:DEFAULT_OUTPUT_DIR="C:\Path\For\Default\Decks"
+$env:PPT_TEMPLATE_PATH="C:\Users\XimenaOviedo\BMAD-XVOR\docs\brand\EPAM_PresalesTemplate.potx"
 ```
 
 Run:
@@ -52,7 +48,7 @@ Open:
 http://localhost:8000
 ```
 
-## Share With Team For Free
+## Share With Team
 
 ### Option A: Same Network
 Share your machine IP URL (e.g. `http://10.0.0.20:8000`).
@@ -61,7 +57,7 @@ Share your machine IP URL (e.g. `http://10.0.0.20:8000`).
 Use Cloudflare Tunnel free plan:
 
 ```powershell
-cloudflared tunnel --url http://localhost:8000
+"C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://localhost:8000
 ```
 
 Share the generated HTTPS URL with the team.
@@ -78,21 +74,20 @@ Share the generated HTTPS URL with the team.
 
 ### "Deck is not being created"
 
-Check this local folder first:
+Check the "Saved locally at" path shown after generation.
+
+If no output folder is entered, the app uses:
 
 ```text
-apps/free-ppt-portal/output-sharepoint-sync/
+C:\Users\<your-user>\Downloads\Generated-PPT-Decks\
 ```
 
-If files appear there, generation is working.
+### "Folder path does not work"
 
-### "Deck is created locally but not in SharePoint"
+Use a full Windows path, for example:
 
-Set `SHAREPOINT_SYNC_DIR` to your actual OneDrive-synced SharePoint folder and restart:
-
-```powershell
-$env:SHAREPOINT_SYNC_DIR="C:\Path\To\Your\Synced\PPTS"
-python app.py
+```text
+C:\Users\XimenaOviedo\Documents\GeneratedDecks
 ```
 
-Tip: In Windows Explorer, navigate to the synced SharePoint folder and copy the full path from the address bar.
+Tip: Open the folder in File Explorer and copy the path from the address bar.

@@ -10,15 +10,10 @@ from pptx.util import Pt
 
 app = Flask(__name__)
 
-# Free/no-Entra mode: write decks to a locally synced SharePoint folder.
-# OneDrive sync client uploads the file automatically.
-SHAREPOINT_SYNC_DIR = Path(
-    os.getenv("SHAREPOINT_SYNC_DIR", "./output-sharepoint-sync")
+# Local mode: each user chooses where the PPT is saved on their own computer.
+DEFAULT_OUTPUT_DIR = Path(
+    os.getenv("DEFAULT_OUTPUT_DIR", str(Path.home() / "Downloads" / "Generated-PPT-Decks"))
 ).resolve()
-SHAREPOINT_FOLDER_URL = os.getenv(
-    "SHAREPOINT_FOLDER_URL",
-    "https://epam.sharepoint.com/sites/CPGOpportunities/Shared%20Documents/AI%20Agent%20MVP/PPTS",
-)
 TEMPLATE_PATH = Path(
     os.getenv("PPT_TEMPLATE_PATH", "../../docs/brand/EPAM_PresalesTemplate.potx")
 ).resolve()
@@ -58,7 +53,13 @@ def add_bullet_slide(prs: Presentation, title: str, bullets: list[str]) -> None:
                 pass
 
 
-def generate_deck(topic: str, audience: str, industry: str, extra_prompt: str) -> tuple[Path, str]:
+def generate_deck(
+    topic: str,
+    audience: str,
+    industry: str,
+    extra_prompt: str,
+    output_dir: Path,
+) -> Path:
     # python-pptx loads .pptx files directly, but not .potx templates.
     # In no-Entra/free mode we keep this robust by falling back to a blank deck.
     if TEMPLATE_PATH.exists() and TEMPLATE_PATH.suffix.lower() == ".pptx":
@@ -69,8 +70,8 @@ def generate_deck(topic: str, audience: str, industry: str, extra_prompt: str) -
     today = datetime.now().strftime("%Y-%m-%d")
     file_name = f"{safe_slug(topic)}-deck-{today}.pptx"
 
-    SHAREPOINT_SYNC_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = SHAREPOINT_SYNC_DIR / file_name
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out_path = output_dir / file_name
 
     # 9-slide baseline structure (can be refined later by the full agent workflow).
     add_bullet_slide(prs, f"{topic} Capability", [
@@ -118,19 +119,17 @@ def generate_deck(topic: str, audience: str, industry: str, extra_prompt: str) -
     ])
     add_bullet_slide(prs, "Thank You", [
         "Contact the consulting team",
-        "Deck available in SharePoint",
+        "Deck saved in your selected folder",
         f"Notes: {extra_prompt[:120] or 'N/A'}",
     ])
 
     prs.save(str(out_path))
-
-    file_url = f"{SHAREPOINT_FOLDER_URL.rstrip('/')}/{file_name}"
-    return out_path, file_url
+    return out_path
 
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return render_template("index.html", default_output_dir=str(DEFAULT_OUTPUT_DIR))
 
 
 @app.route("/generate", methods=["POST"])
@@ -139,26 +138,27 @@ def generate():
     audience = request.form.get("audience", "").strip()
     industry = request.form.get("industry", "").strip()
     extra_prompt = request.form.get("extra_prompt", "").strip()
+    output_folder = request.form.get("output_folder", "").strip()
 
-    if not topic or not audience or not industry:
+    chosen_output_dir = Path(output_folder).expanduser().resolve() if output_folder else DEFAULT_OUTPUT_DIR
+
+    if not topic or not audience or not industry or not output_folder:
         return render_template(
             "index.html",
-            error="Topic, audience, and industry are required.",
+            error="Topic, audience, industry, and output folder are required.",
             form=request.form,
+            default_output_dir=str(DEFAULT_OUTPUT_DIR),
         )
 
-    out_path, file_url = generate_deck(topic, audience, industry, extra_prompt)
-    sharepoint_sync_dir_raw = os.getenv("SHAREPOINT_SYNC_DIR")
-    using_fallback_dir = not sharepoint_sync_dir_raw
+    out_path = generate_deck(topic, audience, industry, extra_prompt, chosen_output_dir)
 
     return render_template(
         "index.html",
         success=True,
         file_name=out_path.name,
         local_file_path=str(out_path),
-        sharepoint_folder=SHAREPOINT_FOLDER_URL,
-        sharepoint_file=file_url,
-        using_fallback_dir=using_fallback_dir,
+        saved_folder=str(chosen_output_dir),
+        default_output_dir=str(DEFAULT_OUTPUT_DIR),
     )
 
 

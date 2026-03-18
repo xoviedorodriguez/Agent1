@@ -6,7 +6,7 @@ It includes:
 - BMAD planning templates for PRD, architecture, stories, and QA gates
 - GitHub issue and pull request templates for team collaboration
 - Local agent instruction files for consistent AI-assisted work in VS Code
-- A free no-Entra web portal for team PPT requests and SharePoint handoff
+- A free web portal for team PPT requests with local save per user computer
 
 ## Free Team Portal (Recommended)
 
@@ -17,13 +17,14 @@ Path: `apps/free-ppt-portal/`
 What users do:
 1. Open the portal URL
 2. Fill in topic, audience, and industry
+3. Choose the output folder on their computer
 3. Click **Generate Deck**
-4. Open the SharePoint link shown in the success message
+4. Open the local path shown in the success message
 
-How uploads work in free mode:
-- The app writes deck files into a local OneDrive-synced folder
-- OneDrive sync uploads files to SharePoint automatically
-- No Entra app registration is required for this mode
+How save works in free mode:
+- The app writes deck files directly to the folder selected by the user
+- No SharePoint setup is required
+- No Entra app registration is required
 
 See setup details in `apps/free-ppt-portal/README.md`.
 
