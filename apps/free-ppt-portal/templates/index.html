@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT Capability Builder</title>
+  <style>
+    :root {
+      --cobalt: #0047FF;
+      --aqua: #0078C2;
+      --iris: #8453D2;
+      --snow: #FBFAFA;
+      --night: #060606;
+      --slate: #4A71BD;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Calibri, Arial, sans-serif;
+      color: var(--night);
+      background: linear-gradient(140deg, #fbfafa 0%, #eef3ff 60%, #e9f7ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 860px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid #d9e3ff;
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(74, 113, 189, 0.16);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 24px;
+      background: linear-gradient(120deg, var(--cobalt), var(--slate));
+      color: var(--snow);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: 0.3px;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      opacity: 0.95;
+    }
+
+    form {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid #cedbff;
+      border-radius: 10px;
+      padding: 12px;
+      font: inherit;
+      background: #fff;
+    }
+
+    textarea { min-height: 120px; resize: vertical; }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      background: linear-gradient(120deg, var(--aqua), var(--cobalt));
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .note {
+      color: #2f436f;
+      font-size: 14px;
+    }
+
+    .msg {
+      margin: 0 24px 24px;
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .ok {
+      background: #e8fff8;
+      border: 1px solid #86d7bc;
+    }
+
+    .err {
+      background: #fff1f1;
+      border: 1px solid #f2b4b4;
+    }
+
+    .msg a {
+      color: #0b3bd9;
+      font-weight: 700;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    @media (max-width: 760px) {
+      form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>PPT Capability Builder</h1>
+      <p>Fill in the brief, click Generate, and open SharePoint for your deck.</p>
+    </div>
+
+    <form action="/generate" method="post">
+      <div>
+        <label for="topic">Topic</label>
+        <input id="topic" name="topic" placeholder="Example: Data & Analytics" value="{{ (form.topic if form else '') }}" required>
+      </div>
+
+      <div>
+        <label for="audience">Audience</label>
+        <input id="audience" name="audience" placeholder="Example: Banking CTO" value="{{ (form.audience if form else '') }}" required>
+      </div>
+
+      <div>
+        <label for="industry">Industry</label>
+        <input id="industry" name="industry" placeholder="Example: Financial Services" value="{{ (form.industry if form else '') }}" required>
+      </div>
+
+      <div>
+        <label for="extra_prompt">Specific Needs (optional)</label>
+        <input id="extra_prompt" name="extra_prompt" placeholder="Example: Emphasize compliance and ROI" value="{{ (form.extra_prompt if form else '') }}">
+      </div>
+
+      <div class="full">
+        <label for="notes">Extra Context (optional)</label>
+        <textarea id="notes" name="notes" placeholder="Any additional context for future versions"></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Generate Deck</button>
+        <span class="note">Free mode: saves into SharePoint-synced folder (no Entra app).</span>
+      </div>
+    </form>
+
+    {% if error %}
+      <div class="msg err">{{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+      <div class="msg ok">
+        <div><strong>Deck generated:</strong> {{ file_name }}</div>
+        <div>Go to SharePoint folder:</div>
+        <div><a href="{{ sharepoint_folder }}" target="_blank" rel="noopener noreferrer">{{ sharepoint_folder }}</a></div>
+        <div style="margin-top: 10px;">Direct file link (after sync finishes):</div>
+        <div><a href="{{ sharepoint_file }}" target="_blank" rel="noopener noreferrer">{{ sharepoint_file }}</a></div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
